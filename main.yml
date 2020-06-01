@@ -70,12 +70,14 @@
   - name: create ansible tomcat directory
     file:
       path: /usr/share/tomcat/webapps/ROOT
+#      path: /usr/share/tomcat/webapps/ansible
       state: directory
 
   - name: copy static index.html to tomcat webapps/ansible/index.html
     template:
       src: index.html.j2
       dest: /usr/share/tomcat/webapps/ROOT/index.html
+#      dest: /usr/share/tomcat/webapps/ansible/index.html
       mode: 0644
 
   - name: start tomcat
@@ -106,7 +108,7 @@
       dest: /usr/share/tomcat/webapps/ansible/index.html
 
 - name: deploy postgres
-  hosts: apps
+#  hosts: apps
   gather_facts: false
   become: true
   hosts: appdbs
@@ -131,6 +133,16 @@
 #    command: postgresql-setup initdb
 #  - name: initilize postgres some more
 #    command: chkconfig postgresql on
+
+
+  - name: initilize postgres
+    command: postgresql-setup initdb
+    register: r_postgres_init
+    failed_when: >-
+      r_postgres_init.rc != 0 and
+      r_postgres_init.stdout != 'Data directory is not empty!'
+
+
   - name: start postgres
     service:
       name: postgresql.service
@@ -140,7 +152,7 @@
   hosts: apps
   gather_facts: false
   become: true
-  hosts: apps
+#  hosts: apps
   tasks:
   - name: install apache
     yum:
